@@ -65,7 +65,6 @@ from forcebalance.finite_difference import fdwrap, f1d2p, f12d3p, f1d7p, in_fd
 from forcebalance.molecule import Molecule
 from forcebalance.output import getLogger
 logger = getLogger(__name__)
-
 #========================================================#
 #| Global, user-tunable variables (simulation settings) |#
 #========================================================#
@@ -185,6 +184,210 @@ def energy_derivatives(engine, FF, mvals, h, pgrad, length, AGrad=True, dipole=F
         else:
             G[i,:]   = EDG[:]
     return G, GDx, GDy, GDz
+
+def energy_derivatives_TINKER(FF, mvals, h, pgrad, length, AGrad=True):
+    # find the prm file name
+    lines = file("liquid.key").readlines()
+    for line in lines:
+      if "PARAMETERS" in line.upper(): 
+        prmprefix = line.split()[1].split(".prm")[0]
+    #initialize the energy gradient and dipole gradient array
+    G   = np.zeros((FF.np,length))
+    GDx = np.zeros((FF.np,length))
+    GDy = np.zeros((FF.np,length))
+    GDz = np.zeros((FF.np,length))
+    if not AGrad:
+        return G, GDx, GDy, GDz
+    #Actually tinkerpath is an argument in FB
+    tinkerpath = "$TINKERPATH" 
+    #Record key file except for the first line
+    lines = file("liquid-md.key").readlines()[1:]
+    ofile = open("runAna_m.sh","w")
+    ofil1 = open("runAna_p.sh","w")
+    #backup the current water.prm
+    os.rename(prmprefix +".prm", prmprefix + ".prm.org")
+    for i in pgrad:
+        #minus and plus
+        prmfile1 = open("liquid_%02d_m.key"%i, 'w')
+        prmfile2 = open("liquid_%02d_p.key"%i, 'w')
+        prmfile1.write("parameters ./%s_%02d_m.prm\n"%(prmprefix,i))
+        prmfile2.write("parameters ./%s_%02d_p.prm\n"%(prmprefix,i))
+        for line in lines:
+            prmfile1.write(line)
+            prmfile2.write(line)
+        prmfile1.close()
+        prmfile2.close()
+
+        mvals_= mvals
+        mvals_[i] += -abs(h) 
+        FF.make(mvals_)
+        os.rename(prmprefix + ".prm", prmprefix + "_%02d_m.prm"%i)
+        mvals_[i] += abs(h)*2.0 
+        FF.make(mvals_)
+        os.rename(prmprefix + ".prm", prmprefix + "_%02d_p.prm"%i)
+        mvals_[i] += -abs(h) 
+
+        if i == pgrad[-1]:
+            cmdstr1 = tinkerpath+"/analyze ./liquid-md.arc -k ./liquid_%02d_m.key G,E,M > liquid_%02d_m.out \n"%(i,i)
+            cmdstr2 = tinkerpath+"/analyze ./liquid-md.arc -k ./liquid_%02d_p.key G,E,M > liquid_%02d_p.out \n"%(i,i)
+        else:
+            cmdstr1 = tinkerpath+"/analyze ./liquid-md.arc -k ./liquid_%02d_m.key G,E,M > liquid_%02d_m.out &\n"%(i,i)
+            cmdstr2 = tinkerpath+"/analyze ./liquid-md.arc -k ./liquid_%02d_p.key G,E,M > liquid_%02d_p.out &\n"%(i,i)
+        ofile.write(cmdstr1)
+        ofil1.write(cmdstr2)
+    ofile.close()
+    ofil1.close()
+    #wait 5sec, for safe
+    time.sleep(5.0)
+    os.rename(prmprefix + ".prm.org", prmprefix + ".prm")
+    #use 1 core for each analyze job
+    cmdstr3 = "sed 's/OPENMP-THREADS  12/OPENMP-THREADS 1/g' -i ./liquid_??_?.key"
+    os.system(cmdstr3)
+    cmdstr3 = "sed 's/openmp-threads  12/openmp-threads 1/g' -i ./liquid_??_?.key"
+    os.system(cmdstr3)
+
+    os.system("sh runAna_m.sh")
+    os.system("sh runAna_p.sh")
+    #Check whether all analyze jobs finished!
+    readFlag = 0
+    while readFlag==0:
+        cmdstr1 = "grep 'Dipole X,Y,Z-Components :' liquid_*_m.out >dipole_m.dat"
+        cmdstr2 = "grep 'Dipole X,Y,Z-Components :' liquid_*_p.out >dipole_p.dat"
+        os.system(cmdstr1)
+        os.system(cmdstr2)
+        nLinesDm = sum(1 for line in open("dipole_m.dat"))
+        nLinesDp = sum(1 for line in open("dipole_p.dat"))
+        if ((nLinesDm==length*len(pgrad)) and (nLinesDp==length*len(pgrad))):
+            readFlag = 1
+            break
+        else:
+            print("Some analyze jobs are still running! I will sleep for 30 seconds !\r")
+            time.sleep(30.0)
+    #If all jobs finished, calculate numerical gradients
+    if readFlag==1:
+        for i in pgrad:
+            eanl_m = []
+            eanl_p = []
+            dip_px = []
+            dip_py = []
+            dip_pz = []
+            dip_mx = []
+            dip_my = []
+            dip_mz = []
+            lines = file("liquid_%02d_m.out"%i).readlines()
+            for line in lines:
+                s = line.split()
+                if 'Total Potential Energy : ' in line:
+                    eanl_m.append(float(s[4]) * 4.184)
+                if 'Dipole X,Y,Z-Components :' in line:
+          	        dip_mx.append(float(s[-3]))
+          	        dip_my.append(float(s[-2]))
+          	        dip_mz.append(float(s[-1]))
+            lines = file("liquid_%02d_p.out"%i).readlines()
+            for line in lines:
+                s = line.split()
+                if 'Total Potential Energy : ' in line:
+          	        eanl_p.append(float(s[4]) * 4.184)
+                if 'Dipole X,Y,Z-Components :' in line:
+          	        dip_px.append(float(s[-3]))
+          	        dip_py.append(float(s[-2]))
+          	        dip_pz.append(float(s[-1]))
+
+            #use np.array here 
+            eanl_p = np.array(eanl_p) 
+            eanl_m = np.array(eanl_m)
+            dip_px = np.array(dip_px)
+            dip_py = np.array(dip_py)
+            dip_pz = np.array(dip_pz)
+            dip_mx = np.array(dip_mx)
+            dip_my = np.array(dip_my)
+            dip_mz = np.array(dip_mz)
+            #2-sides numerical grad.
+            G[i,:]   = (eanl_p - eanl_m)/(2*h)
+            GDx[i,:] = (dip_px - dip_mx)/(2*h) 
+            GDy[i,:] = (dip_py - dip_my)/(2*h) 
+            GDz[i,:] = (dip_pz - dip_mz)/(2*h)
+    return G, GDx, GDy, GDz
+
+def energy_derivatives_gas(FF, h, pgrad, length, AGrad=True):
+    # find the prm file name
+    lines = file("gas.key").readlines()
+    for line in lines:
+      if "PARAMETERS" in line.upper(): 
+        prmprefix = line.split()[1].split(".prm")[0]
+    #initialize the energy gradient array
+    G   = np.zeros((FF.np,length))
+    if not AGrad:
+        return G
+    #Actually tinkerpath is an argument in FB
+    tinkerpath = "$TINKERPATH" 
+    #Record key file except for the first line
+    lines = file("gas-md.key").readlines()[1:]
+    ofile = open("runAna_gas_m.sh","w")
+    ofil1 = open("runAna_gas_p.sh","w")
+    for i in pgrad:
+        #minus and plus
+        prmfile1 = open("gas_%02d_m.key"%i, 'w')
+        prmfile2 = open("gas_%02d_p.key"%i, 'w')
+        prmfile1.write("parameters ./%s_%02d_m.prm\n"%(prmprefix, i))
+        prmfile2.write("parameters ./%s_%02d_p.prm\n"%(prmprefix, i))
+        for line in lines:
+            prmfile1.write(line)
+            prmfile2.write(line)
+        prmfile1.close()
+        prmfile2.close()
+
+        if i == pgrad[-1]:
+            cmdstr1 = tinkerpath+"/analyze ./gas-md.arc -k ./gas_%02d_m.key E > gas_%02d_m.out \n"%(i,i)
+            cmdstr2 = tinkerpath+"/analyze ./gas-md.arc -k ./gas_%02d_p.key E > gas_%02d_p.out \n"%(i,i)
+        else:
+            cmdstr1 = tinkerpath+"/analyze ./gas-md.arc -k ./gas_%02d_m.key E > gas_%02d_m.out &\n"%(i,i)
+            cmdstr2 = tinkerpath+"/analyze ./gas-md.arc -k ./gas_%02d_p.key E > gas_%02d_p.out &\n"%(i,i)
+        ofile.write(cmdstr1)
+        ofil1.write(cmdstr2)
+    ofile.close()
+    ofil1.close()
+    #wait 1sec, for safe
+    time.sleep(1.0)
+
+    os.system("sh runAna_gas_m.sh")
+    os.system("sh runAna_gas_p.sh")
+    #Check whether all analyze jobs finished!
+    readFlag = 0
+    while readFlag==0:
+        cmdstr1 = "grep 'Total Potential Energy : ' gas_*_m.out >energy_m.dat"
+        cmdstr2 = "grep 'Total Potential Energy : ' gas_*_p.out >energy_p.dat"
+        os.system(cmdstr1)
+        os.system(cmdstr2)
+        nLinesDm = sum(1 for line in open("energy_m.dat"))
+        nLinesDp = sum(1 for line in open("energy_p.dat"))
+        if ((nLinesDm==length*len(pgrad)) and (nLinesDp==length*len(pgrad))):
+            readFlag = 1
+            break
+        else:
+            print("Some analyze jobs are still running! I will sleep for 30 seconds !\r")
+            time.sleep(30.0)
+    #If all jobs finished, calculate numerical gradients
+    if readFlag==1:
+        for i in pgrad:
+            eanl_m = []
+            eanl_p = []
+            lines = file("gas_%02d_m.out"%i).readlines()
+            for line in lines:
+                s = line.split()
+                if 'Total Potential Energy : ' in line:
+                    eanl_m.append(float(s[4]) * 4.184)
+            lines = file("gas_%02d_p.out"%i).readlines()
+            for line in lines:
+                s = line.split()
+                if 'Total Potential Energy : ' in line:
+          	        eanl_p.append(float(s[4]) * 4.184)
+            #use np.array here 
+            eanl_p = np.array(eanl_p) 
+            eanl_m = np.array(eanl_m)
+            #2-sides numerical grad.
+            G[i,:]   = (eanl_p - eanl_m)/(2*h)
+    return G
 
 def property_derivatives(engine, FF, mvals, h, pgrad, kT, property_driver, property_kwargs, AGrad=True):
 
@@ -452,7 +655,7 @@ def main():
     pV = atm_unit * pressure * Volumes
     pV_avg, pV_err = mean_stderr(pV)
     Rho_avg, Rho_err = mean_stderr(Rhos)
-    PrintEDA(EDA, NMol)
+    #PrintEDA(EDA, NMol)
 
     #==============================================#
     # Now run the simulation for just the monomer. #
@@ -470,7 +673,7 @@ def main():
 
     mEnergies = mPotentials + mKinetics
     mEne_avg, mEne_err = mean_stderr(mEnergies)
-    PrintEDA(mEDA, 1)
+    #PrintEDA(mEDA, 1)
 
     #============================================#
     #  Compute the potential energy derivatives. #
@@ -489,11 +692,13 @@ def main():
     # Compute the energy and dipole derivatives.
     printcool("Condensed phase energy and dipole derivatives\nInitializing array to length %i" % len(Energies), color=4, bold=True)
     click()
-    G, GDx, GDy, GDz = energy_derivatives(Liquid, FF, mvals, h, pgrad, len(Energies), AGrad, dipole=True)
+    #G, GDx, GDy, GDz = energy_derivatives(Liquid, FF, mvals, h, pgrad, len(Energies), AGrad, dipole=True)
+    G, GDx, GDy, GDz = energy_derivatives_TINKER(FF, mvals, h, pgrad, len(Energies), AGrad)
     logger.info("Condensed phase energy derivatives took %.3f seconds\n" % click())
     click()
     printcool("Gas phase energy derivatives", color=4, bold=True)
-    mG, _, __, ___ = energy_derivatives(Gas, FF, mvals, h, pgrad, len(mEnergies), AGrad, dipole=False)
+    #mG, _, __, ___ = energy_derivatives(Gas, FF, mvals, h, pgrad, len(mEnergies), AGrad, dipole=False)
+    mG = energy_derivatives_gas(FF, h, pgrad, len(mEnergies), AGrad)
     logger.info("Gas phase energy derivatives took %.3f seconds\n" % click())
 
     #==============================================#
@@ -715,6 +920,8 @@ def main():
 
     logger.info("Writing all simulation data to disk.\n")
     lp_dump((Rhos, Volumes, Potentials, Energies, Dips, G, [GDx, GDy, GDz], mPotentials, mEnergies, mG, Rho_err, Hvap_err, Alpha_err, Kappa_err, Cp_err, Eps0_err, NMol),'npt_result.p')
+    # for safe
+    time.sleep(5.0)
 
 if __name__ == "__main__":
     main()

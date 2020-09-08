@@ -236,7 +236,8 @@ class Liquid(Target):
     def prepare_temp_directory(self):
         """ Prepare the temporary directory by copying in important files. """
         abstempdir = os.path.join(self.root,self.tempdir)
-        for f in self.nptfiles + self.nvtfiles:
+        #for f in self.nptfiles + self.nvtfiles:
+        for f in self.nptfiles:
             LinkFile(os.path.join(self.root, self.tgtdir, f), os.path.join(abstempdir, f))
         for f in self.scripts:
             LinkFile(os.path.join(os.path.split(__file__)[0],"data",f),os.path.join(abstempdir,f))
@@ -352,22 +353,41 @@ class Liquid(Target):
         else:
             return 0
 
+#    def npt_simulation(self, temperature, pressure, simnum):
+#        """ Submit a NPT simulation to the Work Queue. """
+#        wq = getWorkQueue()
+#        if not os.path.exists('npt_result.p'):
+#            link_dir_contents(os.path.join(self.root,self.rundir),os.getcwd())
+#            self.last_traj += [os.path.join(os.getcwd(), i) for i in self.extra_output]
+#            self.liquid_mol[simnum%len(self.liquid_mol)].write(self.liquid_coords, ftype='tinker' if self.engname == 'tinker' else None)
+#            cmdstr = '%s python npt.py %s %.3f %.3f' % (self.nptpfx, self.engname, temperature, pressure)
+#            if wq is None:
+#                logger.info("Running condensed phase simulation locally.\n")
+#                logger.info("You may tail -f %s/npt.out in another terminal window\n" % os.getcwd())
+#                _exec(cmdstr, copy_stderr=True, outfnm='npt.out')
+#            else:
+#                queue_up(wq, command = cmdstr+' > npt.out 2>&1 ',
+#                         input_files = self.nptfiles + self.scripts + ['forcebalance.p'],
+#                         output_files = ['npt_result.p', 'npt.out'] + self.extra_output, tgt=self)
+
+   #! Modified by Chengwen Liu for multiple trajectores liquid simulations
+   #! works for multiple liquid targets
+   #! Sep.2020 
+   #==============================================================================================================
     def npt_simulation(self, temperature, pressure, simnum):
-        """ Submit a NPT simulation to the Work Queue. """
-        wq = getWorkQueue()
+        """ Submit Several NPT simulations on our Clusters """
+        liquid_tars, temperatures, nodes = np.loadtxt(os.path.join(self.root,self.liquid_node), usecols=(0,1,2,), unpack=True, dtype="str",skiprows=0)
         if not os.path.exists('npt_result.p'):
             link_dir_contents(os.path.join(self.root,self.rundir),os.getcwd())
             self.last_traj += [os.path.join(os.getcwd(), i) for i in self.extra_output]
             self.liquid_mol[simnum%len(self.liquid_mol)].write(self.liquid_coords, ftype='tinker' if self.engname == 'tinker' else None)
-            cmdstr = '%s python npt.py %s %.3f %.3f' % (self.nptpfx, self.engname, temperature, pressure)
-            if wq is None:
-                logger.info("Running condensed phase simulation locally.\n")
-                logger.info("You may tail -f %s/npt.out in another terminal window\n" % os.getcwd())
+            dir = os.path.join(self.root, self.rundir, str(temperature)+"K-"+str(pressure) + "atm")
+            for tar, temp, node in zip(liquid_tars,temperatures, nodes):
+              if (tar in dir) and (float(temp) == temperature): 
+                cmdstr = 'ssh %s "source ~/.forcebalance; cd %s; nohup %s python -u npt.py %s %.3f %.3f > npt.out 2>err.log &" ' % (node, dir, self.nptpfx, self.engname, temperature, pressure)
                 _exec(cmdstr, copy_stderr=True, outfnm='npt.out')
-            else:
-                queue_up(wq, command = cmdstr+' > npt.out 2>&1 ',
-                         input_files = self.nptfiles + self.scripts + ['forcebalance.p'],
-                         output_files = ['npt_result.p', 'npt.out'] + self.extra_output, tgt=self)
+
+#Above ============================================================================================================
 
     def nvt_simulation(self, temperature):
         """ Submit a NVT simulation to the Work Queue. """
@@ -612,6 +632,7 @@ class Liquid(Target):
                     logger.warning('In %s :\n' % os.getcwd())
                     logger.warning('The file ./%s/npt_result.p does not exist so we cannot read it\n' % label)
                     pass
+
             if len(Points) == 0:
                 logger.error('The liquid simulations have terminated with \x1b[1;91mno readable data\x1b[0m - this is a problem!\n')
                 raise RuntimeError
@@ -717,6 +738,11 @@ class Liquid(Target):
         stResults = {} # Storing the results from the NVT run for surface tension
         tt = 0
         for label, PT in zip(self.Labels, self.PhasePoints):
+            #modified by Chengwen Liu
+            while not os.path.exists('./%s/npt_result.p' % label):
+                logger.warning("waiting for liquid simulations to finish!\r")
+                time.sleep(30.0)
+
             if os.path.exists('./%s/npt_result.p' % label):
                 logger.info('Reading information from ./%s/npt_result.p\n' % label)
                 Points.append(PT)
@@ -735,10 +761,7 @@ class Liquid(Target):
                         logger.warning('The file ./%s/nvt_result.p does not exist so we cannot read it\n' % label)
                         pass
                 tt += 1
-            else:
-                logger.warning('In %s :\n' % os.getcwd())
-                logger.warning('The file ./%s/npt_result.p does not exist so we cannot read it\n' % label)
-                pass
+
         if len(Points) == 0:
             logger.error('The liquid simulations have terminated with \x1b[1;91mno readable data\x1b[0m - this is a problem!\n')
             raise RuntimeError

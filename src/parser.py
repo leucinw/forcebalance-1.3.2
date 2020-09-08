@@ -65,6 +65,7 @@ gen_opts_types = {
     'strings' : {"gmxpath"      : (which('mdrun'), 60, 'Path for GROMACS executables (if not the default)', 'All targets that use GROMACS', ['GMX']),
                  "gmxsuffix"    : ('', 60, 'The suffix of GROMACS executables', 'All targets that use GROMACS', ['GMX']),
                  "tinkerpath"   : (which('testgrad'), 60, 'Path for TINKER executables (if not the default)', 'All targets that use TINKER', ['TINKER']),
+                 "liquid_node"  : ('example.node', 60, 'nodelist for liquid simulation', 'All targets that use TINKER', ['TINKER']),
                  "penalty_type" : ("L2", 100, 'Type of the penalty, L2 or Hyp in the optimizer', 'All optimizations'),
                  "scan_vals"    : (None, -100, 'Values to scan in the parameter space, given like this: -0.1:0.1:11', 'Job types scan_mvals and scan_pvals'),
                  "readchk"      : (None, -50, 'Name of the restart file we read from', 'Restart jobtype "newton" with "writechk" set'),
