@@ -1,0 +1,5 @@
+600 snapshots from FromLiquid-AMOEBA-F/cluster-03
+600 snapshots from FromFreezing-DirectV3-F/cluster-03
+600 snapshots from FromLiquid-AMOEBA-R/cluster-R-03
+600 snapshots from FromLiquid-TIP4PEW-R/cluster-R-03
+1 snapshots from GasPhaseMinima/calcs/03

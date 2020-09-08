@@ -1,0 +1,31 @@
+Script started on Thu 15 Feb 2018 03:20:18 PM CST
+total 3460
+-rwxr-xr-x. 1 liuchw users    1381 Oct 20 16:09 [0m[01;32madd-tabs.py[0m
+-rw-r--r--. 1 liuchw users   75811 Oct 20 16:09 api.cfg
+-rw-r--r--. 1 liuchw users    1802 Oct 20 16:09 api_header.tex
+drwxr-xr-x. 2 liuchw users    4096 Oct 20 16:09 [01;34mcallgraph[0m
+-rw-r--r--. 1 liuchw users  703187 Oct 20 16:09 [01;35mCallGraph.png[0m
+-rw-r--r--. 1 liuchw users   75788 Oct 20 16:09 doxygen.cfg
+-rw-r--r--. 1 liuchw users    5905 Oct 20 16:09 DoxygenLayout.xml
+-rwxr-xr-x. 1 liuchw users   14006 Oct 20 16:09 [01;32mdoxypy.py[0m
+-rw-r--r--. 1 liuchw users  492238 Oct 20 16:09 ForceBalance-API.pdf
+-rw-r--r--. 1 liuchw users 2001574 Oct 20 16:09 ForceBalance-Manual.pdf
+-rw-r--r--. 1 liuchw users    2017 Oct 20 16:09 glossary.txt
+-rw-r--r--. 1 liuchw users    1782 Oct 20 16:09 header.tex
+drwxr-xr-x. 2 liuchw users    4096 Oct 20 16:09 [01;34mImages[0m
+-rw-r--r--. 1 liuchw users   13298 Oct 20 16:09 installation.txt
+-rw-r--r--. 1 liuchw users   11303 Oct 20 16:09 introduction.txt
+-rwxr-xr-x. 1 liuchw users     767 Oct 20 16:09 [01;32mmake-all-documentation.sh[0m
+-rw-r--r--. 1 liuchw users   14519 Oct 20 16:09 makedocumentation.py
+-rwxr-xr-x. 1 liuchw users   35588 Oct 20 16:09 [01;32mmake-option-index.py[0m
+-rw-r--r--. 1 liuchw users       0 Feb 15 15:20 newfile
+-rw-r--r--. 1 liuchw users    2195 Oct 20 16:09 roadmap.txt
+-rw-r--r--. 1 liuchw users   28189 Oct 20 16:09 tutorial.txt
+-rw-r--r--. 1 liuchw users     304 Oct 20 16:09 upload-documentation.sh
+-rw-r--r--. 1 liuchw users    8435 Oct 20 16:09 usage.txt
+[m]0;liuchw@node42:~/Softwares/forcebalance-v1.3.2/doc[liuchw@node42 doc]$ baby
+bash: baby: command not found
+]0;liuchw@node42:~/Softwares/forcebalance-v1.3.2/doc[liuchw@node42 doc]$ exit
+exit
+
+Script done on Thu 15 Feb 2018 03:20:27 PM CST

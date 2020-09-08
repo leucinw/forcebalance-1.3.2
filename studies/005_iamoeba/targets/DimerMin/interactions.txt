@@ -1,0 +1,113 @@
+#==================================================================#
+#                                                                  #
+# Explanation for the formatting of this file                      #
+# Anything after the octothrope (#) is a comment                   #
+# Note to self: Please don't delete this section                   #
+#                                                                  #
+# 1) The "$global" section contains settings that pertain to all   #
+# systems, like the tinker .key file, which can be overrideen in   #
+# the "$system" section.                                           #
+#                                                                  #
+# $global                                                          #
+# keyfile water.key                                                #
+# $end                                                             #
+#                                                                  #
+# 2) The "$system" section describes a system that is involved in  #
+# the interaction energy.  Each system has a name and a geometry   #
+# file that goes with it.  The name *must be a valid Python        #
+# variable name.*                                                  #
+#                                                                  #
+# $system                                                          #
+# name smith01                                                     #
+# geometry smith01.xyz                                             #
+# keyfile smith01.key # This will override water.key               #
+# $end                                                             #
+#                                                                  #
+# Supplementary files like .key, .top and .mdp files               #
+# can be specified here.  They should contain references           #
+# to the force field file (.prm, .itp); the actual force field     #
+# file is unneeded as ForceBalance will create it.                 #
+#                                                                  #
+# 3) The "$interaction" section describes an interaction energy    #
+# between two systems.  Interactions can optionally have names,    #
+# if not provided then ForceBalance creates one.  The "energy"     #
+# keyword specifies the reference interaction energy (which can    #
+# come from high-level QM.)  The "equation" section describes      #
+# how the interaction is calculated by combining systems.          #
+# The variables in the equations are the system names, and the     #
+# syntax is identical to the Python language.  For example:        #
+#                                                                  #
+#                                                                  #
+# $interaction                                                     #
+# name Smith2                                                      #
+# equation smith02 - 2*monomer_exp                                 #
+# energy -4.4528632                                                #
+# $end                                                             #
+#                                                                  #
+# Here, the systems "smith02" and "monomer_exp" must be defined.   #
+# ForceBalance has an internal energy dictionary that stores       #
+# the system energies computed from the force field; then it       #
+# uses 'exec' to actually create variables and functions           #
+# with these names.                                                #
+#                                                                  #
+#     ==== All energy units are in kilocalories per mole. ====     #
+#                                                                  #
+# Future features:                                                 #
+#                                                                  #
+# We should allow the user to create a system from a               #
+# subset of another system.  For instance, we might                #
+# want to compute the interaction energy between molecules         #
+# in a cluster, but use the exact geometries in the cluster.       #
+# This should be done using a "from" keyword that specifies        #
+# the system from which this one is derived, and a "select"        #
+# keyword using Python's selection syntax, such as:                #
+#                                                                  #
+# $system                                                          #
+# name my_second_water                                             #
+# from my_water_dimer # name of the parent system                  #
+# select [3:6]        # for selecting atoms 4-6 (second molecule)  #
+# $end                                                             #
+#                                                                  #
+# It should be possible to have an "optimize" keyword.             #
+# This means that the system should be geometry-optimized          #
+# (or TS-optimized) before the energy is computed.  Keep in mind   #
+# that if all systems with the "optimize" keyword need to be       #
+# optimized every time the objective function is evaluated.        #
+#                                                                  #
+# Furthermore, systems should optionally come with their own       #
+# absolute energies (which should not be fitted directly - rather  #
+# they should be combined to yield interaction energies.)          #
+#                                                                  #
+#==================================================================#
+
+$global
+keyfile interactions.key
+$end
+
+# The water dimer and monomer were optimized at 
+# the MP2/heavy-aug-cc-pVTZ level of theory using MOLPRO.
+
+$system
+name monomer_opt
+geometry monomer_opt.xyz
+optimize
+rmsd_weight 0.0
+$end
+
+$system
+name dimer
+geometry dimer.xyz
+optimize
+$end
+
+# The dimer interaction energy was computed following the procedure 
+# outlined in Bates and Tschumper.  The MP2/CBS energies were estimated using
+# two-point Helgaker extrapolation from aQZ and a5Z energies,
+# and then a delta-CCSD(T) correction computed at haTZ was applied.
+# The quantities were then combined to yield the interaction energy.
+
+$interaction
+name Dimer
+equation dimer - 2*monomer_opt
+energy -4.9846437
+$end

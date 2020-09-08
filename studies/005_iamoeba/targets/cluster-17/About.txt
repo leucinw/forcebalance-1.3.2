@@ -1,0 +1,4 @@
+600 snapshots from FromLiquid-AMOEBA-F/cluster-17
+591 snapshots from FromLiquid-AMOEBA-R/cluster-R-17
+600 snapshots from FromLiquid-TIP4PEW-R/cluster-R-17
+6 snapshots from GasPhaseMinima/calcs/17

@@ -1,0 +1,4 @@
+600 snapshots from FromLiquid-AMOEBA-F/cluster-19
+599 snapshots from FromLiquid-AMOEBA-R/cluster-R-19
+600 snapshots from FromLiquid-TIP4PEW-R/cluster-R-19
+1 snapshots from GasPhaseMinima/calcs/19

@@ -1,0 +1,50 @@
+#==========================================#
+#| File containing vibrational modes from |#
+#|      experiment/QM for ForceBalance    |#
+#|                                        |#
+#| Octothorpes are comments               |#
+#| This file should be formatted like so: |#
+#| (Full XYZ file for the molecule)       |#
+#| Number of atoms                        |#
+#| Comment line                           |#
+#| a1 x1 y1 z1 (xyz for atom 1)           |#
+#| a2 x2 y2 z2 (xyz for atom 2)           |#
+#|                                        |#
+#| These coords will be actually used     |#
+#|                                        |#
+#| (Followed by vibrational modes)        |#
+#| ...                                    |#
+#| v (Eigenvalue in wavenumbers)          |#
+#| dx1 dy1 dz1 (Eigenvector for atom 1)   |#
+#| dx2 dy2 dz2 (Eigenvector for atom 2)   |#
+#| ...                                    |#
+#| (Empty line is optional)               |#
+#| v (Eigenvalue)                         |#
+#| dx1 dy1 dz1 (Eigenvector for atom 1)   |#
+#| dx2 dy2 dz2 (Eigenvector for atom 2)   |#
+#| ...                                    |#
+#| and so on                              |#
+#|                                        |#
+#| Please list freqs in increasing order  |#
+#==========================================#
+
+3
+From Dang and Pettitt, J. Phys. Chem. 91 (1987), 3349.
+O   0.000000    0.000000    0.187238
+H   0.000000    0.777560    0.745932
+H   0.000000   -0.777560    0.745932
+
+1594
+    0.000000    0.000000    0.067397
+    0.000000    0.460210   -0.534729
+    0.000000   -0.460210   -0.534729
+
+3656
+    0.000000    0.000000    0.054041
+    0.000000   -0.560983   -0.428764
+    0.000000    0.560983   -0.428764
+
+3755
+    0.000000    0.072189    0.000000
+    0.000000   -0.572752   -0.411521
+    0.000000   -0.572752    0.411521

@@ -1,0 +1,375 @@
+#==================================================================#
+#                                                                  #
+# Explanation for the formatting of this file                      #
+# Anything after the octothrope (#) is a comment                   #
+# Note to self: Please don't delete this section                   #
+#                                                                  #
+# 1) The "$global" section contains settings that pertain to all   #
+# systems, like the tinker .key file, which can be overrideen in   #
+# the "$system" section.                                           #
+#                                                                  #
+# $global                                                          #
+# keyfile water.key                                                #
+# $end                                                             #
+#                                                                  #
+# 2) The "$system" section describes a system that is involved in  #
+# the interaction energy.  Each system has a name and a geometry   #
+# file that goes with it.  The name *must be a valid Python        #
+# variable name.*                                                  #
+#                                                                  #
+# $system                                                          #
+# name smith01                                                     #
+# geometry smith01.xyz                                             #
+# keyfile smith01.key # This will override water.key               #
+# $end                                                             #
+#                                                                  #
+# Supplementary files like .key, .top and .mdp files               #
+# can be specified here.  They should contain references           #
+# to the force field file (.prm, .itp); the actual force field     #
+# file is unneeded as ForceBalance will create it.                 #
+#                                                                  #
+# 3) The "$interaction" section describes an interaction energy    #
+# between two systems.  Interactions can optionally have names,    #
+# if not provided then ForceBalance creates one.  The "energy"     #
+# keyword specifies the reference interaction energy (which can    #
+# come from high-level QM.)  The "equation" section describes      #
+# how the interaction is calculated by combining systems.          #
+# The variables in the equations are the system names, and the     #
+# syntax is identical to the Python language.  For example:        #
+#                                                                  #
+#                                                                  #
+# $interaction                                                     #
+# name Smith2                                                      #
+# equation smith02 - 2*monomer_exp                                 #
+# energy -4.4528632                                                #
+# $end                                                             #
+#                                                                  #
+# Here, the systems "smith02" and "monomer_exp" must be defined.   #
+# ForceBalance has an internal energy dictionary that stores       #
+# the system energies computed from the force field; then it       #
+# uses 'exec' to actually create variables and functions           #
+# with these names.                                                #
+#                                                                  #
+#     ==== All energy units are in kilocalories per mole. ====     #
+#                                                                  #
+# Future features:                                                 #
+#                                                                  #
+# We should allow the user to create a system from a               #
+# subset of another system.  For instance, we might                #
+# want to compute the interaction energy between molecules         #
+# in a cluster, but use the exact geometries in the cluster.       #
+# This should be done using a "from" keyword that specifies        #
+# the system from which this one is derived, and a "select"        #
+# keyword using Python's selection syntax, such as:                #
+#                                                                  #
+# $system                                                          #
+# name my_second_water                                             #
+# from my_water_dimer # name of the parent system                  #
+# select [3:6]        # for selecting atoms 4-6 (second molecule)  #
+# $end                                                             #
+#                                                                  #
+# It should be possible to have an "optimize" keyword.             #
+# This means that the system should be geometry-optimized          #
+# (or TS-optimized) before the energy is computed.  Keep in mind   #
+# that if all systems with the "optimize" keyword need to be       #
+# optimized every time the objective function is evaluated.        #
+#                                                                  #
+# Furthermore, systems should optionally come with their own       #
+# absolute energies (which should not be fitted directly - rather  #
+# they should be combined to yield interaction energies.)          #
+#                                                                  #
+#==================================================================#
+#
+# The following are interaction energies computed with CCSD(T)/CBS
+# for ten water dimers (Smith set), a cyclic trimer, tetramer, 
+# pentamer, and eight hexamers.  See below for details.
+#
+
+$global
+keyfile interactions.key
+$end
+
+# The water dimers geometries were taken from the Supporting
+# Information of J.G.C.M. van Duijneveldt-van de Rijdt et al., 
+# Phys. Chem. Chem. Phys., 2003,5, 1169.  Monomer geometries 
+# are fixed at the experimental geometry. 
+
+$system
+name smith01
+geometry smith01.xyz
+$end
+
+$system
+name smith02
+geometry smith02.xyz
+$end
+
+$system
+name smith03
+geometry smith03.xyz
+$end
+
+$system
+name smith04
+geometry smith04.xyz
+$end
+
+$system
+name smith05
+geometry smith05.xyz
+$end
+
+$system
+name smith06
+geometry smith06.xyz
+$end
+
+$system
+name smith07
+geometry smith07.xyz
+$end
+
+$system
+name smith08
+geometry smith08.xyz
+$end
+
+$system
+name smith09
+geometry smith09.xyz
+$end
+
+$system
+name smith10
+geometry smith10.xyz
+$end
+
+$system
+name monomer_exp
+geometry monomer_exp.xyz
+$end
+
+# The monomer, trimer, tetramer, and pentamer geometries were optimized in 
+# Molpro using the MP2/heavy-aug-cc-pVTZ level of theory following the
+# procedure outlined in Bates and Tschumper.
+
+$system
+name monomer_opt
+geometry monomer_opt.xyz
+optimize
+rmsd_weight 0.0
+$end
+
+$system
+name trimer
+geometry trimer.xyz
+optimize
+$end
+
+$system
+name tetramer
+geometry tetra.xyz
+optimize
+$end
+
+$system
+name pentamer
+geometry penta.xyz
+optimize
+$end
+
+# The hexamer geometries were taken from the Supporting Information
+# of D.M. Bates and G.S. Tschumper, J. Phys. Chem. A 2009, 113, 3555.  They
+# are optimized at the MP2/heavy-aug-cc-pVTZ level of theory.
+
+$system
+name hexamer01
+geometry 01-Prism.xyz
+optimize
+$end
+
+$system
+name hexamer02
+geometry 02-Cage.xyz
+optimize
+$end
+
+$system
+name hexamer03
+geometry 03-Bag.xyz
+optimize
+$end
+
+$system
+name hexamer04
+geometry 04-Cyclic-Chair.xyz
+optimize
+$end
+
+$system
+name hexamer05
+geometry 05-Book-1.xyz
+optimize
+$end
+
+$system
+name hexamer06
+geometry 06-Book-2.xyz
+optimize
+$end
+
+$system
+name hexamer07
+geometry 07-Cyclic-Boat-1.xyz
+optimize
+$end
+
+$system
+name hexamer08
+geometry 08-Cyclic-Boat-2.xyz
+optimize
+$end
+
+# The dimer interaction energies were computed using 
+# counterpoise-corrected CCSD(T)/CBS//MP2/aug-cc-pVTZ
+# using two-point Helgaker extrapolation from aug-cc-pVTZ 
+# and aug-cc-pVQZ.  The computed energies exactly match
+# Kumar and Jordan's CCSD(T)/aug-cc-pV5Z data in the
+# Erratum: J. Chem. Phys. 132, 139902 (2010).
+
+$interaction
+name Smith1
+equation smith01 - 2*monomer_exp
+energy -4.9681395
+$end
+
+$interaction
+name Smith2
+equation smith02 - 2*monomer_exp
+energy -4.4528632
+$end
+
+$interaction
+name Smith3
+equation smith03 - 2*monomer_exp
+energy -4.4184395
+$end
+
+$interaction
+name Smith4
+equation smith04 - 2*monomer_exp
+energy -4.2497247
+$end
+
+$interaction
+name Smith5
+equation smith05 - 2*monomer_exp
+energy -3.9975024
+$end
+
+$interaction
+name Smith6
+equation smith06 - 2*monomer_exp
+energy -3.9566650
+$end
+
+$interaction
+name Smith7
+equation smith07 - 2*monomer_exp
+energy -3.2564067
+$end
+
+$interaction
+name Smith8
+equation smith08 - 2*monomer_exp
+energy -1.3000843
+$end
+
+$interaction
+name Smith9
+equation smith09 - 2*monomer_exp
+energy -3.0466090
+$end
+
+$interaction
+name Smith10
+equation smith10 - 2*monomer_exp
+energy -2.1816456
+$end
+
+# The trimer, tetramer, and pentamer interaction energies
+# were computed following the procedure outlined in Bates
+# and Tschumper.  The MP2/CBS energies were estimated using
+# two-point Helgaker extrapolation from aQZ and a5Z energies,
+# and then a delta-CCSD(T) correction computed at haTZ was applied.
+# The quantities were then combined to yield the interaction energy.
+
+$interaction
+name Trimer
+equation trimer - 3*monomer_opt
+energy -15.7421219
+$end
+
+$interaction
+name Tetramer
+equation tetramer - 4*monomer_opt
+energy -27.4004914
+$end
+
+$interaction
+name Pentamer
+equation pentamer - 5*monomer_opt
+energy -35.9334097
+$end
+
+# The hexamer energies are CCSD(T)/CBS values taken from Bates and Tschumper.
+# MP2-F12 was used to obtain the MP2/CBS energies, then a delta-CCSD(T)
+# correction computed at haTZ was applied.
+
+$interaction
+name Prism
+equation hexamer01 - 6*monomer_opt
+energy -45.92
+$end
+
+$interaction
+name Cage
+equation hexamer02 - 6*monomer_opt
+energy -45.67
+$end
+
+$interaction
+name Bag
+equation hexamer03 - 6*monomer_opt
+energy -44.30
+$end
+
+$interaction
+name CyclicChair
+equation hexamer04 - 6*monomer_opt
+energy -44.12
+$end
+
+$interaction
+name Book1
+equation hexamer05 - 6*monomer_opt
+energy -45.20
+$end
+
+$interaction
+name Book2
+equation hexamer06 - 6*monomer_opt
+energy -44.90
+$end
+
+$interaction
+name CyclicBoat1
+equation hexamer07 - 6*monomer_opt
+energy -43.13
+$end
+
+$interaction
+name CyclicBoat2
+equation hexamer08 - 6*monomer_opt
+energy -43.07
+$end

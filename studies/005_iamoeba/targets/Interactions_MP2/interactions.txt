@@ -1,0 +1,326 @@
+#==================================================================#
+#                                                                  #
+# Explanation for the formatting of this file                      #
+# Anything after the octothrope (#) is a comment                   #
+# Note to self: Please don't delete this section                   #
+#                                                                  #
+# 1) The "$global" section contains settings that pertain to all   #
+# systems, like the tinker .key file, which can be overrideen in   #
+# the "$system" section.                                           #
+#                                                                  #
+# $global                                                          #
+# keyfile water.key                                                #
+# $end                                                             #
+#                                                                  #
+# 2) The "$system" section describes a system that is involved in  #
+# the interaction energy.  Each system has a name and a geometry   #
+# file that goes with it.  The name *must be a valid Python        #
+# variable name.*                                                  #
+#                                                                  #
+# $system                                                          #
+# name smith01                                                     #
+# geometry smith01.xyz                                             #
+# keyfile smith01.key # This will override water.key               #
+# $end                                                             #
+#                                                                  #
+# Supplementary files like .key, .top and .mdp files               #
+# can be specified here.  They should contain references           #
+# to the force field file (.prm, .itp); the actual force field     #
+# file is unneeded as ForceBalance will create it.                 #
+#                                                                  #
+# 3) The "$interaction" section describes an interaction energy    #
+# between two systems.  Interactions can optionally have names,    #
+# if not provided then ForceBalance creates one.  The "energy"     #
+# keyword specifies the reference interaction energy (which can    #
+# come from high-level QM.)  The "equation" section describes      #
+# how the interaction is calculated by combining systems.          #
+# The variables in the equations are the system names, and the     #
+# syntax is identical to the Python language.  For example:        #
+#                                                                  #
+#                                                                  #
+# $interaction                                                     #
+# name Smith2                                                      #
+# equation smith02 - 2*monomer_exp                                 #
+# energy -4.4528632                                                #
+# $end                                                             #
+#                                                                  #
+# Here, the systems "smith02" and "monomer_exp" must be defined.   #
+# ForceBalance has an internal energy dictionary that stores       #
+# the system energies computed from the force field; then it       #
+# uses 'exec' to actually create variables and functions           #
+# with these names.                                                #
+#                                                                  #
+#     ==== All energy units are in kilocalories per mole. ====     #
+#                                                                  #
+# Future features:                                                 #
+#                                                                  #
+# We should allow the user to create a system from a               #
+# subset of another system.  For instance, we might                #
+# want to compute the interaction energy between molecules         #
+# in a cluster, but use the exact geometries in the cluster.       #
+# This should be done using a "from" keyword that specifies        #
+# the system from which this one is derived, and a "select"        #
+# keyword using Python's selection syntax, such as:                #
+#                                                                  #
+# $system                                                          #
+# name my_second_water                                             #
+# from my_water_dimer # name of the parent system                  #
+# select [3:6]        # for selecting atoms 4-6 (second molecule)  #
+# $end                                                             #
+#                                                                  #
+# It should be possible to have an "optimize" keyword.             #
+# This means that the system should be geometry-optimized          #
+# (or TS-optimized) before the energy is computed.  Keep in mind   #
+# that if all systems with the "optimize" keyword need to be       #
+# optimized every time the objective function is evaluated.        #
+#                                                                  #
+# Furthermore, systems should optionally come with their own       #
+# absolute energies (which should not be fitted directly - rather  #
+# they should be combined to yield interaction energies.)          #
+#                                                                  #
+#==================================================================#
+#
+# All geometries in this file were graciously provided by 
+# S. S. Xantheas (personal communication), with exception of the 
+# water monomer which was optimized in Molpro using MP2/aug-cc-pVTZ 
+# following literature procedures.
+# 
+
+$global
+keyfile interactions.key
+optimize
+$end
+
+$system
+name monomer_opt
+geometry monomer_opt.xyz
+rmsd_weight 0.0
+$end
+
+$system
+name octamer_s4
+geometry octamer_s4.xyz
+$end
+
+$system
+name octamer_d2d
+geometry octamer_d2d.xyz
+$end
+
+$system
+name n11_434
+geometry endecamer_n11_434_isomer.xyz
+$end
+
+$system
+name n11_515
+geometry endecamer_n11_515_isomer.xyz
+$end
+
+$system
+name n11_551
+geometry endecamer_n11_551_isomer.xyz
+$end
+
+$system
+name n11_443
+geometry endecamer_n11_443_isomer.xyz
+$end
+
+$system
+name n11_4412
+geometry endecamer_n11_4412_isomer.xyz
+$end
+
+$system
+name n16_boat
+geometry n16_boat_isomer.xyz
+$end
+
+$system
+name n16_boat3
+geometry n16_boat3_isomer.xyz
+$end
+
+$system
+name n16_tip3p
+geometry n16_tip3p_isomer.xyz
+$end
+
+$system
+name n16_abab
+geometry n16_abab_isomer.xyz
+$end
+
+$system
+name n16_aabb
+geometry n16_aabb_isomer.xyz
+$end
+
+$system
+name n17_sphere
+geometry n17_sphere.xyz
+$end
+
+$system
+name n17_5525
+geometry n17_5525.xyz
+$end
+
+$system
+name n20_dodecahedron_c1
+geometry n20_dodecahedron_c1.xyz
+$end
+
+$system
+name n20_fused_cubes_c2
+geometry n20_fused_cubes_c2.xyz
+$end
+
+$system
+name n20_facesharing_pentagonal_prisms_c1
+geometry n20_facesharing_pentagonal_prisms_c1.xyz
+$end
+
+$system
+name n20_edgesharing_pentagonal_prisms_c1
+geometry n20_edgesharing_pentagonal_prisms_c1.xyz
+$end
+
+#=================================================================#
+#| The following 8-mer energies are MP2/CBS//MP2/aug-cc-pVTZ     |#
+#| taken from Xantheas and Apra. J. Chem. Phys. 120, 823 (2004). |#
+#=================================================================#
+
+$interaction
+name Octamer_S4
+equation octamer_s4 - 8*monomer_opt
+energy -72.7
+$end
+
+$interaction
+name Octamer_D2d
+equation octamer_d2d - 8*monomer_opt
+energy -72.7
+$end
+
+#============================================#
+#| The following 11-mer energies are        |#
+#| MP2/aug-cc-pV(4|5)Z//MP2/aug-cc-pVTZ     |#
+#| taken from Bulusu, Xantheas and Zeng,    |#
+#| J. Phys. Chem. A., 2006, 110, 11781.	    |#
+#| The first three are 5Z and the last two  |#
+#| are 4Z; no extrapolation was attempted.  |#
+#============================================#
+
+$interaction
+name 11-mer_434
+equation n11_434 - 11*monomer_opt
+energy -105.718
+$end
+
+$interaction
+name 11-mer_515
+equation n11_515 - 11*monomer_opt
+energy -105.182
+$end
+
+$interaction
+name 11-mer_551
+equation n11_551 - 11*monomer_opt
+energy -104.920
+$end
+
+$interaction
+name 11-mer_443
+equation n11_443 - 11*monomer_opt
+energy -104.760
+$end
+
+$interaction
+name 11-mer_4412
+equation n11_4412 - 11*monomer_opt
+energy -103.971
+$end
+
+#============================================#
+#| The following 16-mer and 17-mer energies |#
+#| are CCSD(T)/aug-cc-pVTZ//MP2/aug-cc-pVTZ |#
+#| taken from Yoo and Xantheas et al., 	    |#
+#| J. Phys. Chem. Lett. 2010, 1, 3122.	    |#
+#| Geometries are taken from the SI.	    |#
+#| Two more 17-mer geometries are available |#
+#| but the CCSD(T) energy was not reported. |#
+#============================================#
+
+$interaction
+name 16-mer_boat-a
+equation n16_boat - 16*monomer_opt
+energy -170.80
+$end
+
+$interaction
+name 16-mer_boat-b
+equation n16_boat3 - 16*monomer_opt
+energy -170.63
+$end
+
+$interaction
+name 16-mer_antiboat
+equation n16_tip3p - 16*monomer_opt
+energy -170.54
+$end
+
+$interaction
+name 16-mer_abab
+equation n16_abab - 16*monomer_opt
+energy -171.05
+$end
+
+$interaction
+name 16-mer_aabb
+equation n16_aabb - 16*monomer_opt
+energy -170.51
+$end 
+
+$interaction
+name 17-mer_sphere
+equation n17_sphere - 17*monomer_opt
+energy -182.54
+$end
+
+$interaction
+name 17-mer_5525
+equation n17_5525 - 17*monomer_opt
+energy -181.83
+$end
+
+#=========================================================================#
+#| The following 20-mer energies are MP2/CBS//MP2/aug-cc-pVTZ taken from |#
+#| Fanourgakis and Xantheas et al., J. Chem. Phys. 121, 2655 (2004).     |#
+#=========================================================================#
+
+$interaction
+name 20-mer_Dodecahedron
+equation n20_dodecahedron_c1 - 20*monomer_opt
+energy -200.1
+$end
+
+$interaction
+name 20-mer_FusedCubes
+equation n20_fused_cubes_c2 - 20*monomer_opt
+energy -212.1
+$end
+
+$interaction
+name 20-mer_FaceSharingPrisms
+equation n20_facesharing_pentagonal_prisms_c1 - 20*monomer_opt
+energy -215.2
+$end
+
+$interaction
+name 20-mer_EdgeSharingPrisms
+equation n20_edgesharing_pentagonal_prisms_c1 - 20*monomer_opt
+energy -218.1
+$end
+

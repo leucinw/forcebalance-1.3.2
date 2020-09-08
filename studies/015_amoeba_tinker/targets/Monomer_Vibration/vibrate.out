@@ -1,0 +1,96 @@
+
+ ##############################################################################
+ ##############################################################################
+ ##                                                                          ##
+ ##             TINKER  ---  Software Tools for Molecular Design             ##
+ ##                                                                          ##
+ ##                        Version 6.0   October 2011                        ##
+ ##                                                                          ##
+ ##               Copyright (c)  Jay William Ponder  1990-2011               ##
+ ##                            All Rights Reserved                           ##
+ ##                                                                          ##
+ ##############################################################################
+ ##############################################################################
+
+
+ Eigenvalues of the Hessian Matrix :
+
+    1     0.000    2     0.000    3     0.000    4     0.005    5     0.022
+    6     0.120    7   329.588    8  2000.034    9  2577.161
+
+ Vibrational Frequencies (cm-1) :
+
+    1     0.000    2     0.000    3     0.001    4     7.905    5    14.454
+    6    22.984    7  1592.381    8  3654.291    9  3752.491
+
+ Vibrational Normal Mode     1 with Frequency      0.000 cm-1
+
+     Atom     Delta X     Delta Y     Delta Z
+
+        1    0.575889    0.036992   -0.017798
+        2    0.575889    0.036992   -0.017798
+        3    0.575889    0.036992   -0.017798
+
+ Vibrational Normal Mode     2 with Frequency      0.000 cm-1
+
+     Atom     Delta X     Delta Y     Delta Z
+
+        1    0.041036   -0.525634    0.235283
+        2    0.041036   -0.525634    0.235283
+        3    0.041036   -0.525634    0.235283
+
+ Vibrational Normal Mode     3 with Frequency      0.001 cm-1
+
+     Atom     Delta X     Delta Y     Delta Z
+
+        1    0.330102   -0.316274    0.352614
+        2    0.330102   -0.316274    0.352614
+        3    0.330102   -0.316274    0.352614
+
+ Vibrational Normal Mode     4 with Frequency      7.905 cm-1
+
+     Atom     Delta X     Delta Y     Delta Z
+
+        1    0.000000    0.000000    0.000000
+        2    0.707107    0.000000    0.000000
+        3   -0.707107    0.000000    0.000000
+
+ Vibrational Normal Mode     5 with Frequency     14.454 cm-1
+
+     Atom     Delta X     Delta Y     Delta Z
+
+        1    0.000000   -0.047885    0.000000
+        2    0.000000    0.379918   -0.595412
+        3    0.000000    0.379918    0.595412
+
+ Vibrational Normal Mode     6 with Frequency     22.984 cm-1
+
+     Atom     Delta X     Delta Y     Delta Z
+
+        1   -0.088771    0.000000    0.000000
+        2    0.704315    0.000000    0.000000
+        3    0.704315    0.000000    0.000000
+
+ Vibrational Normal Mode     7 with Frequency   1592.381 cm-1
+
+     Atom     Delta X     Delta Y     Delta Z
+
+        1    0.000000    0.000000    0.067397
+        2    0.000000    0.460210   -0.534729
+        3    0.000000   -0.460210   -0.534729
+
+ Vibrational Normal Mode     8 with Frequency   3654.291 cm-1
+
+     Atom     Delta X     Delta Y     Delta Z
+
+        1    0.000000    0.000000    0.054041
+        2    0.000000   -0.560983   -0.428764
+        3    0.000000    0.560983   -0.428764
+
+ Vibrational Normal Mode     9 with Frequency   3752.491 cm-1
+
+     Atom     Delta X     Delta Y     Delta Z
+
+        1    0.000000    0.072189    0.000000
+        2    0.000000   -0.572752   -0.411521
+        3    0.000000   -0.572752    0.411521

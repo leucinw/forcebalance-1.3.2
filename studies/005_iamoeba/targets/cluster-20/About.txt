@@ -1,0 +1,2 @@
+600 snapshots from FromLiquid-AMOEBA-F/cluster-20
+4 snapshots from GasPhaseMinima/calcs/20

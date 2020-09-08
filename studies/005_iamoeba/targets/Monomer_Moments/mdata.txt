@@ -1,0 +1,38 @@
+#==========================================#
+#| File containing multipole moments from |#
+#|      experiment/QM for ForceBalance    |#
+#|                                        |#
+#| Octothorpes are comments               |#
+#| This file should be formatted like so: |#
+#| (Full XYZ file for the molecule)       |#
+#| Number of atoms                        |#
+#| Comment line                           |#
+#| a1 x1 y1 z1 (xyz for atom 1)           |#
+#| a2 x2 y2 z2 (xyz for atom 2)           |#
+#|                                        |#
+#| These coords will be actually used     |#
+#|                                        |#
+#| (Followed by multipole moments)        |#
+#| dipole, in Debye                       |#
+#| dx dy dz                               |#
+#| (Empty line is optional)               |#
+#| quadrupole, in Buckingham              |#
+#| qxx                                    |#
+#| qxy qyy                                |#
+#| qxz qyz qzz                            |#
+#==========================================#
+
+3
+From Dang and Pettitt, J. Phys. Chem. 91 (1987), 3349.
+O      0.000000    0.000000    0.187238
+H      0.777560    0.000000    0.745932
+H     -0.777560    0.000000    0.745932
+
+dipole
+0.000       0.000       1.855
+
+quadrupole
+2.630       0.000       0.000
+0.000      -2.500       0.000
+0.000       0.000      -0.130
+

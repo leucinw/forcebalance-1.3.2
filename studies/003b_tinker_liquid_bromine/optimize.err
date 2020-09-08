@@ -1,0 +1,13 @@
+WARNING:root:The OpenMM modules cannot be imported (Cannot interface with OpenMM)
+Traceback (most recent call last):
+  File "/home/liuchw/python/lib/python2.7/site-packages/forcebalance-1.3.2-py2.7-linux-x86_64.egg/EGG-INFO/scripts/ForceBalance.py", line 39, in Run_ForceBalance
+    objective   = Objective(options, tgt_opts, forcefield)
+  File "/home/liuchw/python/lib/python2.7/site-packages/forcebalance-1.3.2-py2.7-linux-x86_64.egg/forcebalance/objective.py", line 142, in __init__
+    else: Tgt = Implemented_Targets[opts['type']](options,opts,forcefield)
+  File "/home/liuchw/python/lib/python2.7/site-packages/forcebalance-1.3.2-py2.7-linux-x86_64.egg/forcebalance/tinkerio.py", line 1039, in __init__
+    super(Liquid_TINKER,self).__init__(options,tgt_opts,forcefield)
+  File "/home/liuchw/python/lib/python2.7/site-packages/forcebalance-1.3.2-py2.7-linux-x86_64.egg/forcebalance/liquid.py", line 208, in __init__
+    self.prepare_temp_directory()
+  File "/home/liuchw/python/lib/python2.7/site-packages/forcebalance-1.3.2-py2.7-linux-x86_64.egg/forcebalance/liquid.py", line 239, in prepare_temp_directory
+    for f in self.nptfiles + self.nvtfiles:
+AttributeError: 'Liquid_TINKER' object has no attribute 'nvtfiles'

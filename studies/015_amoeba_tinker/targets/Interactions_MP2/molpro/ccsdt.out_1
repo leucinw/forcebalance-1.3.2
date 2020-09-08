@@ -1,0 +1,81 @@
+
+ Primary working directories    : .
+ Secondary working directories  : .
+ Wavefunction directory         : /home/leeping/wfu/
+ Main file repository           : /home/leeping/src/forcebalance/studies/005c_openmm_amoeba/simulations/Interactions_MP2/molpro/./
+
+ ARCHNAME  : Linux/x86_64
+ FC        : /opt/intel/Compiler/11.1/072/bin/intel64/ifort
+ FCVERSION : 11.1
+ BLASLIB   : -L/opt/intel/Compiler/11.1/072/mkl/lib/em64t -lmkl_intel_ilp64 -lmkl_sequential -lmkl_core
+ id        : martinez
+
+ Nodes     nprocs
+ leeping      1
+ ga_uses_ma=false, calling ma_init with nominal heap.
+ GA-space will be limited to   8.0 MW (determined by -G option)
+
+ Using default tuning parameters: mindgm=1; mindgv=20; mindgc=4; mindgr=1; noblas=0; mincuda=1000; minvec=7
+ default implementation of scratch files=df  
+
+ ***,set WATER345A index mono-opt mono-opt  MP2/AUG-CC-PVTZ,H=CC-PVTZ  ENERGY=-76.328
+ memory,2800,m
+ nosym
+ noorient
+ angstrom
+ geometry={
+  O         -0.0108475524        0.0000000000       -0.0078073547
+  H         -0.2325063556        0.0000000000        0.9276424586
+  H          0.9504149080        0.0000000000       -0.0209781038
+ }
+  
+ SET,CHARGE=0
+ SET,SPIN=0
+ GTHRESH,ZERO=1.e-14,ONEINT=1.e-14,TWOINT=1.e-14,ENERGY=1.e-9
+  
+ basis=sto-3g
+ rhf
+  
+ basis,default=aug-cc-pVTZ
+  
+ rhf
+ eehf=energy
+ ccsd(t)
+ eemp2=emp2
+ cemp2=eemp2-eehf
+ eemp3=emp3
+ cemp3=eemp3-eehf
+ eeccsd=energc
+ ceccsd=eeccsd-eehf
+ eeccsdt=energy
+ ceccsdt=eeccsdt-eehf
+ temp2=emp2_trip
+ teccsd=ectrip
+ show[1,20f20.12],ee*,ce*,te*
+ show[1,60f20.12],_E*
+  
+
+ Variables initialized (659), CPU time= 0.01 sec
+ Commands  initialized (462), CPU time= 0.00 sec, 486 directives.
+ Default parameters read. Elapsed time= 0.03 sec
+
+ Checking input...
+ Passed
+1
+
+
+                                         ***  PROGRAM SYSTEM MOLPRO  ***
+                         Copyright, University College Cardiff Consultants Limited, 2008
+
+                                    Version 2010.1 linked 4 Jun 2012 23:11:12 
+
+
+ **********************************************************************************************************************************
+ LABEL *   set WATER345A index mono-opt mono-opt  MP2/AUG-CC-PVTZ,H=CC-PVTZ  ENER        
+ Linux-3.0.0-17-generic/leeping(x86_64) 64 bit mpp version                               DATE: 20-Aug-12          TIME: 14:54:32  
+ **********************************************************************************************************************************
+
+ SHA1:             bf614eba2fc9650ecd53ff9a3e97d83c224aec6b
+ **********************************************************************************************************************************
+
+ GLOBAL ERROR fehler on processor   0                                         

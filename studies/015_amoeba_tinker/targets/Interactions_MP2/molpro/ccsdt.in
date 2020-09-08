@@ -1,0 +1,36 @@
+***, set WATER345A index mono-opt mono-opt  MP2/AUG-CC-PVTZ,H=CC-PVTZ  ENERGY=-76.32805447
+memory,200,m
+nosym
+noorient
+angstrom
+geometry={
+ O         -0.0108475524        0.0000000000       -0.0078073547
+ H         -0.2325063556        0.0000000000        0.9276424586
+ H          0.9504149080        0.0000000000       -0.0209781038
+}
+
+SET,CHARGE=0
+SET,SPIN=0
+GTHRESH,ZERO=1.e-14,ONEINT=1.e-14,TWOINT=1.e-14,ENERGY=1.e-9
+
+basis=sto-3g
+rhf
+
+basis,default=aug-cc-pVTZ
+
+rhf
+eehf=energy
+ccsd(t)
+eemp2=emp2
+cemp2=eemp2-eehf
+eemp3=emp3
+cemp3=eemp3-eehf
+eeccsd=energc
+ceccsd=eeccsd-eehf
+eeccsdt=energy
+ceccsdt=eeccsdt-eehf
+temp2=emp2_trip
+teccsd=ectrip
+show[1,20f20.12],ee*,ce*,te*
+show[1,60f20.12],_E*
+
