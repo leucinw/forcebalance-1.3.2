@@ -190,15 +190,71 @@ class BindingEnergy(Target):
             # Thus, all variable names in here are protected using an underscore.
             self.FF.make(mvals_)
             VectorD_ = []
-            for sys_ in self.sys_opts:
-                Energy_, RMSD_ = self.system_driver(sys_)
-                #print "Setting %s to" % sys_, Energy_
+
+            # The following code was odified by Chengwen Liu to accelarate the tinker analyze and optimize jobs
+            def Energy_RMSD(systems):
+              tinkerhome = os.environ["TINKERPATH"]
+              f1 = open("runAna.sh", "w") 
+              f2 = open("runMin.sh", "w") 
+              i = 0
+              for sys_ in systems: 
+                opts = systems[sys_]
+                optimize = (opts['optimize'] if 'optimize' in opts else False)
+                if not optimize: 
+                  if (i+1)%24 == 0:
+                    cmd = "rm -f %s.out\n%s/analyze %s.xyz -k %s.key E > %s.out \n"%(sys_, os.environ["TINKERPATH"], sys_, sys_, sys_)
+                    i += 1
+                  else:
+                    cmd = "rm -f %s.out\n%s/analyze %s.xyz -k %s.key E > %s.out & \n"%(sys_, os.environ["TINKERPATH"], sys_, sys_, sys_)
+                    i += 1
+                  f1.write(cmd)
+                else:
+                  if (i+1)%24 == 0:
+                    cmd = "rm -f %s.xyz_2 %s.out \n%s/optimize %s.xyz -k %s.key 0.0001 > %s.out \n"%(sys_, sys_, os.environ["TINKERPATH"], sys_, sys_, sys_)
+                    i += 1
+                  else:
+                    cmd = "rm -f %s.xyz_2 %s.out \n%s/optimize %s.xyz -k %s.key 0.0001 > %s.out & \n"%(sys_, sys_, os.environ["TINKERPATH"], sys_, sys_, sys_)
+                    i += 1
+                  f2.write(cmd)
+              f1.write("wait\n")
+              f2.write("wait\n")
+              f1.close()
+              f2.close()
+              os.system("sh runAna.sh")
+              os.system("sh runMin.sh")
+              for sys_ in systems:
+                while not os.path.isfile(os.path.join(os.getcwd(), sys_ + ".out")):
+                  time.sleep(1.0)
+              Es = {} 
+              RMSDs = {} 
+              for sys_ in systems:
+                energ = 0.0
+                rmsd = 0.0
+                for line in open("%s.out"%sys_).readlines():
+                  if "Total Potential Energy" in line:
+                    energ = float(line.split()[-2].replace('D','e'))
+                    Es[sys_] = energ
+                    RMSDs[sys_] = 0.0
+                  if "Final Function Value :" in line:
+                    energ = float(line.split()[-1].replace('D','e'))
+                    Es[sys_] = energ
+                    M1 = Molecule("%s.xyz" % sys_, ftype="tinker")
+                    M2 = Molecule("%s.xyz_2" % sys_, ftype="tinker")
+                    M1 += M2
+                    RMSDs[sys_] = M1.ref_rmsd(0)[1]
+              return Es,RMSDs 
+
+            Es, RMSDs = Energy_RMSD(self.sys_opts)
+            for sys_ in self.sys_opts: 
+                Energy_ = Es[sys_] 
+                RMSD_ = RMSDs[sys_]
                 exec("%s = Energy_" % sys_) in locals()
                 RMSDNrm_ = RMSD_ / self.rmsd_denom
                 w_ = self.sys_opts[sys_]['rmsd_weight'] if 'rmsd_weight' in self.sys_opts[sys_] else 1.0
                 VectorD_.append(np.sqrt(w_)*RMSDNrm_)
                 if not in_fd() and RMSD_ != 0.0:
                     self.RMSDDict[sys_] = "% 9.3f % 12.5f" % (RMSD_, w_*RMSDNrm_**2)
+
             VectorE_ = []
             for inter_ in self.inter_opts:
                 Calculated_ = eval(self.inter_opts[inter_]['equation'])
@@ -237,6 +293,7 @@ class BindingEnergy(Target):
         V = compute(mvals)
 
         dV = np.zeros((self.FF.np,len(V)))
+
         if AGrad or AHess:
             for p in self.pgrad:
                 dV[p,:], _ = f12d3p(fdwrap(compute, mvals, p), h = self.h, f0 = V)
